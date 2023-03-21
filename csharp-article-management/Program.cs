@@ -56,18 +56,22 @@
                 {
                     // 1) Rechercher un article par référence.
                     case 1:
+                        DisplayArticleById(articles);
                         break;
 
                     // 2)  Ajouter un article au stock en vérifiant l’unicité de la référence.
                     case 2:
+                        AddArticle(articles);
                         break;
 
                     // 3) Supprimer un article par référence.
                     case 3:
+                        DeleteArticleById(articles);
                         break;
 
                     // 4) Modifier un article par référence.
                     case 4:
+                        EditArticleById(articles);
                         break;
 
                     // 5) Rechercher un article par nom.
@@ -126,53 +130,106 @@
         }
 
         /// <summary>
-        /// Boucle foreach dans notre liste d'articles pour afficher leurs informations
+        /// Boucle foreach dans notre liste d'articles pour afficher l'article dont l'id est égal à l'id entré par l'utilisateur
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayAllArticles(List<Article> articles)
+        private static void DisplayArticleById(List<Article> articles)
         {
-            Console.WriteLine("> Liste des articles: \n");
+            string articleIdString = HandleUserInput("Id Article").ToLower();
 
+            // Vérifie que l'id entré est bien un int valide
+            if (!int.TryParse(articleIdString, out int articleId))
+            {
+                Console.WriteLine($"> Erreur {articleId} n'est pas un id d'article valide");
+                return;
+            }
+
+            if (!articles.Any(article => article.Id == articleId))
+            {
+                Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+            }
+
+            // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
+            /* Article? article = articles.FirstOrDefault(article => article.Id == articleId);
+            if (article != null)
+            {
+                Console.WriteLine($"> Article trouvé avec l'id {articleId}: \n");
+                Console.WriteLine(article.ToString());
+            } */
+
+            Console.WriteLine($"> Article trouvé avec l'id {articleId}: \n");
             foreach (Article article in articles)
             {
-                Console.WriteLine(article.ToString());
+                // Si l'id est égal à l'id entré par l'utilisateur
+                if (article.Id == articleId)
+                {
+                    Console.WriteLine(article.ToString());
+                    // Article trouvé on stop notre boucle
+                    break;
+                }
             }
         }
 
+
         /// <summary>
-        /// Boucle foreach dans notre liste d'articles pour afficher leurs informations selon si le prix est compris entre prix min et prix max 
+        /// Ajoute un article à notre liste d'articles
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayAllArticlesByPriceRange(List<Article> articles)
+        private static void AddArticle(List<Article> articles)
         {
-            string priceMinString = HandleUserInput("Prix minimum:");
 
-            // Vérifie que le prix entré est bien un double valide
-            if (!double.TryParse(priceMinString, out double priceMin))
+        }
+
+        /// <summary>
+        /// Supprime l'article dont l'id est égal à celui entré par l'utilisateur de notre liste
+        /// </summary>
+        /// <param name="articles"></param>
+        private static void DeleteArticleById(List<Article> articles)
+        {
+            string articleIdString = HandleUserInput("Id Article");
+
+            // Vérifie que l'id entré est bien un int valide
+            if (!int.TryParse(articleIdString, out int articleId))
             {
-                Console.WriteLine($"> Erreur {priceMinString} n'est pas un prix valide");
+                Console.WriteLine($"> Erreur {articleId} n'est pas un id d'article valide");
                 return;
             }
 
-            string priceMaxString = HandleUserInput("Prix maximum:");
-
-            // Vérifie que le prix entré est bien un int valide
-            if (!double.TryParse(priceMaxString, out double priceMax))
+            if (!articles.Any(article => article.Id == articleId))
             {
-                Console.WriteLine($"> Erreur {priceMaxString} n'est pas un prix valide");
+                Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+            }
+
+            articles.RemoveAll(article => article.Id == articleId);
+            Console.WriteLine($"> Succès l'article avec l'id {articleId} a bien été supprimer des articles");
+        }
+
+
+        /// <summary>
+        /// Modifie l'article dont l'id est égal à l'id entré par l'utilisateur
+        /// </summary>
+        /// <param name="articles"></param>
+        private static void EditArticleById(List<Article> articles)
+        {
+            string articleIdString = HandleUserInput("Id Article").ToLower();
+
+            // Vérifie que l'id entré est bien un int valide
+            if (!int.TryParse(articleIdString, out int articleId))
+            {
+                Console.WriteLine($"> Erreur {articleId} n'est pas un id d'article valide");
                 return;
             }
 
-            Console.WriteLine($"> Liste des articles dont le prix est compris entre {priceMin} Euro et {priceMax} Euro: \n");
-
-            // LINQ OrderBy pour sortir les résultats par prix croissant
-            foreach (Article article in articles.OrderBy(article => article.Price))
+            if (!articles.Any(article => article.Id == articleId))
             {
-                // Si le prix est égal ou supérieur à prix min et que prix est inférieur ou égale à prix max
-                if (article.Price >= priceMin && article.Price <= priceMax)
-                {
-                    Console.WriteLine(article.ToString());
-                }
+                Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+            }
+
+            // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
+            Article? article = articles.FirstOrDefault(article => article.Id == articleId);
+            if (article != null)
+            {
+                // Modifier
             }
         }
 
@@ -182,7 +239,7 @@
         /// <param name="articles"></param>
         private static void DisplayArticleByName(List<Article> articles)
         {
-            string name = HandleUserInput("Nom:").ToLower();
+            string name = HandleUserInput("Nom").ToLower();
             if (name.Length >= 1 && name.Length < 3)
             {
                 Console.WriteLine($"> Merci d'entrer un nom valide 3 caractères minimums ...");
@@ -207,6 +264,57 @@
                     // Article trouvé on stop notre boucle
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Boucle foreach dans notre liste d'articles pour afficher leurs informations selon si le prix est compris entre prix min et prix max 
+        /// </summary>
+        /// <param name="articles"></param>
+        private static void DisplayAllArticlesByPriceRange(List<Article> articles)
+        {
+            string priceMinString = HandleUserInput("Prix minimum");
+
+            // Vérifie que le prix entré est bien un double valide
+            if (!double.TryParse(priceMinString, out double priceMin))
+            {
+                Console.WriteLine($"> Erreur {priceMinString} n'est pas un prix valide");
+                return;
+            }
+
+            string priceMaxString = HandleUserInput("Prix maximum");
+
+            // Vérifie que le prix entré est bien un int valide
+            if (!double.TryParse(priceMaxString, out double priceMax))
+            {
+                Console.WriteLine($"> Erreur {priceMaxString} n'est pas un prix valide");
+                return;
+            }
+
+            Console.WriteLine($"> Liste des articles dont le prix est compris entre {priceMin} Euro et {priceMax} Euro: \n");
+
+            // LINQ OrderBy pour sortir les résultats par prix croissant
+            foreach (Article article in articles.OrderBy(article => article.Price))
+            {
+                // Si le prix est égal ou supérieur à prix min et que prix est inférieur ou égale à prix max
+                if (article.Price >= priceMin && article.Price <= priceMax)
+                {
+                    Console.WriteLine(article.ToString());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Boucle foreach dans notre liste d'articles pour afficher leurs informations
+        /// </summary>
+        /// <param name="articles"></param>
+        private static void DisplayAllArticles(List<Article> articles)
+        {
+            Console.WriteLine("> Liste des articles: \n");
+
+            foreach (Article article in articles)
+            {
+                Console.WriteLine(article.ToString());
             }
         }
 
