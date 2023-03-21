@@ -72,6 +72,7 @@
 
                     // 5) Rechercher un article par nom.
                     case 5:
+                        DisplayArticleByName(articles);
                         break;
 
                     // 6) Rechercher un article par intervalle de prix de vente.
@@ -171,6 +172,40 @@
                 if (article.Price >= priceMin && article.Price <= priceMax)
                 {
                     Console.WriteLine(article.ToString());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Boucle foreach dans notre liste d'articles pour afficher l'article dont le nom est égal au nom entré par l'utilisateur
+        /// </summary>
+        /// <param name="articles"></param>
+        private static void DisplayArticleByName(List<Article> articles)
+        {
+            string name = HandleUserInput("Nom:").ToLower();
+            if (name.Length >= 1 && name.Length < 3)
+            {
+                Console.WriteLine($"> Merci d'entrer un nom valide 3 caractères minimums ...");
+                return;
+            }
+
+            // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
+            /* Article? article = articles.FirstOrDefault(article => article.Name.ToLower().Equals(name));
+            if (article != null)
+            {
+                Console.WriteLine($"> Article trouvé avec le nom {name}: \n");
+                Console.WriteLine(article.ToString());
+            } */
+
+            Console.WriteLine($"> Article trouvé avec le nom {name}: \n");
+            foreach (Article article in articles)
+            {
+                // Si le nom en minuscule est égal au nom entré par l'utilisateur
+                if (article.Name.ToLower().Equals(name))
+                {
+                    Console.WriteLine(article.ToString());
+                    // Article trouvé on stop notre boucle
+                    break;
                 }
             }
         }
