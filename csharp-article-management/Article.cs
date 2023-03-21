@@ -31,15 +31,22 @@
         public int MaxStock { get; set; }
 
         /// <summary>
+        /// Constructeur par défaut
+        /// </summary>
+        public Article() 
+        { 
+        }
+
+        /// <summary>
         /// Les informations de notre article sous forme de chaine de caractères
         /// </summary>
         /// <returns>Retourne les informations de notre article sous forme de chaine de caractères</returns>
         public override string ToString()
         {
-            return "Id: " + Id + "\n"
-                + "Name: " + Name + "\n"
-                + "Prix: " + Price + " Euro \n"
-                + "Stock: " + CurrentStock + " / " + MaxStock + "\n";
+            return "Id: " + this.Id + "\n"
+                + "Name: " + this.Name + "\n"
+                + "Prix: " + this.Price + " Euro \n"
+                + "Stock: " + this.CurrentStock + " / " + this.MaxStock + "\n";
         }
     }
 }
