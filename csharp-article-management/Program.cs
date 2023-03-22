@@ -1,4 +1,6 @@
-﻿namespace csharp_article_management
+﻿using System.Xml.Linq;
+
+namespace csharp_article_management
 {
     public class Program
     {
@@ -177,7 +179,49 @@
         /// <param name="articles"></param>
         private static void AddArticle(List<Article> articles)
         {
+            string articleName = HandleUserInput("Nom de l'article");
 
+            // On cherche si un article du même nom existe déjà, si c'est le cas on ajoute juste au stock de l'article
+            Article? article = articles.FirstOrDefault(article => article.Name.ToLower().Equals(articleName));
+            if (article != null)
+            {
+                article.CurrentStock += 1;
+                Console.WriteLine($"> Succès l'article {article.Name} a été correctement modifié (+ 1 au stock)");
+            }
+            else
+            {
+                // L'article n'existe pas ont le créer
+
+                string articlePrice = HandleUserInput("Prix de l'article");
+
+                // Vérifie que le prix entré est bien un int valide
+                if (!double.TryParse(articlePrice, out double price))
+                {
+                    Console.WriteLine($"> Erreur {price} n'est pas un prix valide");
+                    return;
+                }
+
+                string articleStock = HandleUserInput("Stock de l'article");
+
+                // Vérifie que le prix entré est bien un int valide
+                if (!int.TryParse(articleStock, out int stock))
+                {
+                    Console.WriteLine($"> Erreur {stock} n'est pas un stock valide");
+                    return;
+                }
+
+                Article newArticle = new Article();
+                // Retourne l'id max de notre liste et ajoute + 1 pour un id libre
+                newArticle.Id = articles.Max(article => article.Id) + 1;
+                newArticle.Name = articleName;
+                newArticle.Price = price;
+                newArticle.CurrentStock = stock;
+                newArticle.MaxStock = stock;
+
+                articles.Add(newArticle);
+
+                Console.WriteLine($"> Succès l'article {newArticle.Name} a été correctement ajouté");
+            }
         }
 
         /// <summary>
@@ -203,7 +247,6 @@
             articles.RemoveAll(article => article.Id == articleId);
             Console.WriteLine($"> Succès l'article avec l'id {articleId} a bien été supprimer des articles");
         }
-
 
         /// <summary>
         /// Modifie l'article dont l'id est égal à l'id entré par l'utilisateur
