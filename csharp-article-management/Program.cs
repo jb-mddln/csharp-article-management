@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace csharp_article_management
 {
@@ -137,7 +138,7 @@ namespace csharp_article_management
         /// <param name="articles"></param>
         private static void DisplayArticleById(List<Article> articles)
         {
-            string articleIdString = HandleUserInput("Id Article").ToLower();
+            string articleIdString = HandleUserInput("Id Article");
 
             // Vérifie que l'id entré est bien un int valide
             if (!int.TryParse(articleIdString, out int articleId))
@@ -149,6 +150,7 @@ namespace csharp_article_management
             if (!articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+                return;
             }
 
             // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
@@ -194,7 +196,7 @@ namespace csharp_article_management
 
                 string articlePrice = HandleUserInput("Prix de l'article");
 
-                // Vérifie que le prix entré est bien un int valide
+                // Vérifie que le prix entré est bien un double valide
                 if (!double.TryParse(articlePrice, out double price))
                 {
                     Console.WriteLine($"> Erreur {price} n'est pas un prix valide");
@@ -242,6 +244,7 @@ namespace csharp_article_management
             if (!articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+                return;
             }
 
             articles.RemoveAll(article => article.Id == articleId);
@@ -254,7 +257,7 @@ namespace csharp_article_management
         /// <param name="articles"></param>
         private static void EditArticleById(List<Article> articles)
         {
-            string articleIdString = HandleUserInput("Id Article").ToLower();
+            string articleIdString = HandleUserInput("Id Article");
 
             // Vérifie que l'id entré est bien un int valide
             if (!int.TryParse(articleIdString, out int articleId))
@@ -263,16 +266,66 @@ namespace csharp_article_management
                 return;
             }
 
+            // Vérifie que notre liste contient bien un article avec l'id entrer par l'utilisateur
             if (!articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
+                return;
             }
 
             // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
             Article? article = articles.FirstOrDefault(article => article.Id == articleId);
             if (article != null)
             {
-                // Modifier
+                string articlePrice = HandleUserInput("Prix de l'article", true);
+                // L'utilisateur a entré un prix on modifie donc le prix de notre article
+                if (!string.IsNullOrEmpty(articlePrice))
+                {
+                    // Vérifie que le prix entré est bien un double valide
+                    if (!double.TryParse(articlePrice, out double price))
+                    {
+                        Console.WriteLine($"> Erreur {price} n'est pas un prix valide");
+                        return;
+                    }
+
+                    // Le prix actuel de l'article n'est pas le même que le prix entré par l'utilisateur, on le modifie
+                    if (article.Price != price)
+                        article.Price = price;
+                }
+
+                string articleStock = HandleUserInput("Stock disponible de l'article", true);
+                // L'utilisateur a entré un stock on modifie donc le stock de notre article
+                if (!string.IsNullOrEmpty(articleStock))
+                {
+                    // Vérifie que le prix entré est bien un int valide
+                    if (!int.TryParse(articleStock, out int stock))
+                    {
+                        Console.WriteLine($"> Erreur {stock} n'est pas un stock valide");
+                        return;
+                    }
+
+                    // Le stock actuel de l'article n'est pas le même que le stock entré par l'utilisateur, on le modifie
+                    if (article.CurrentStock != stock)
+                        article.CurrentStock = stock;
+                }
+
+                string articleMaxStock = HandleUserInput("Stock maximum de l'article", true);
+                // L'utilisateur a entré un stock max on modifie donc le stock max de notre article
+                if (!string.IsNullOrEmpty(articleMaxStock))
+                {
+                    // Vérifie que le stock max entré est bien un int valide
+                    if (!int.TryParse(articleMaxStock, out int maxStock))
+                    {
+                        Console.WriteLine($"> Erreur {articleMaxStock} n'est pas un stock valide");
+                        return;
+                    }
+
+                    // Le stock max actuel de l'article n'est pas le même que le stock max entré par l'utilisateur, on le modifie
+                    if (article.MaxStock != maxStock)
+                        article.MaxStock = maxStock;
+                }
+               
+                Console.WriteLine($"> Succès l'article {article.Name} a été correctement modifié");
             }
         }
 
@@ -327,7 +380,7 @@ namespace csharp_article_management
 
             string priceMaxString = HandleUserInput("Prix maximum");
 
-            // Vérifie que le prix entré est bien un int valide
+            // Vérifie que le prix entré est bien un double valide
             if (!double.TryParse(priceMaxString, out double priceMax))
             {
                 Console.WriteLine($"> Erreur {priceMaxString} n'est pas un prix valide");
@@ -365,8 +418,9 @@ namespace csharp_article_management
         /// Récupère le texte entré par l'utilisateur et vérifie son intégrité
         /// </summary>
         /// <param name="parameterName">Nom du paramètre que l'utilisateur doit entrer</param>
+        /// <param name="allowEmpty">Autorise ou non l'entrée d'un paramètre vide</param>
         /// <returns>string vide ou le paramètre entré par l'utilisateur</returns>
-        private static string HandleUserInput(string parameterName)
+        private static string HandleUserInput(string parameterName, bool allowEmpty = false)
         {
             Console.WriteLine($"> Entrez {parameterName}: ");
 
@@ -374,7 +428,7 @@ namespace csharp_article_management
             string? parameter = Console.ReadLine();
 
             // Boucle qui tant que le texte est vide ou null on boucle jusqu'à ce que l'utilisateur entre quelque chose
-            while (string.IsNullOrEmpty(parameter))
+            while (!allowEmpty && string.IsNullOrEmpty(parameter))
             {
                 Console.WriteLine($"> Erreur {parameterName} ne peut pas être vide ...");
                 Console.WriteLine($"> Entrez {parameterName}: ");
@@ -382,7 +436,7 @@ namespace csharp_article_management
             }
 
             // Condition ternaire si accepte un texte vide et que le texte est vide ou null on retourne un string vide sinon on retourne le texte entré par l'utilisateur
-            return string.IsNullOrEmpty(parameter) ? string.Empty : parameter;
+            return allowEmpty && string.IsNullOrEmpty(parameter) ? string.Empty : parameter;
         }
     }
 }
