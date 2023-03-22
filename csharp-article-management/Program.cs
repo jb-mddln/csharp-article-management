@@ -1,14 +1,12 @@
-﻿using System.Diagnostics;
-using System.Xml.Linq;
-
-namespace csharp_article_management
+﻿namespace csharp_article_management
 {
     public class Program
     {
+        // Déclare notre liste d'articles et l'initialise lors du lancement du programme tant que liste vide
+        private static List<Article> Articles { get; set; } = new List<Article>();
+
         public static void Main(string[] args)
         {
-            List<Article> articles = new List<Article>();
-
             Article articleOne = new Article();
             articleOne.Id = 1;
             articleOne.Name = "Rhum";
@@ -30,9 +28,9 @@ namespace csharp_article_management
             articleThree.CurrentStock = 8;
             articleThree.MaxStock = 20;
 
-            articles.Add(articleOne);
-            articles.Add(articleTwo);
-            articles.Add(articleThree);
+            Articles.Add(articleOne);
+            Articles.Add(articleTwo);
+            Articles.Add(articleThree);
 
             DisplayMenu();
             while (true)
@@ -59,32 +57,32 @@ namespace csharp_article_management
                 {
                     // 1) Rechercher un article par référence.
                     case 1:
-                        DisplayArticleById(articles);
+                        DisplayArticleById();
                         break;
 
                     // 2)  Ajouter un article au stock en vérifiant l’unicité de la référence.
                     case 2:
-                        AddArticle(articles);
+                        AddArticle();
                         break;
 
                     // 3) Supprimer un article par référence.
                     case 3:
-                        DeleteArticleById(articles);
+                        DeleteArticleById();
                         break;
 
                     // 4) Modifier un article par référence.
                     case 4:
-                        EditArticleById(articles);
+                        EditArticleById();
                         break;
 
                     // 5) Rechercher un article par nom.
                     case 5:
-                        DisplayArticleByName(articles);
+                        DisplayArticleByName();
                         break;
 
                     // 6) Rechercher un article par intervalle de prix de vente.
                     case 6:
-                        DisplayAllArticlesByPriceRange(articles);
+                        DisplayAllArticlesByPriceRange();
 
                         // Alternative une ligne sans boucle avec Join et LINQ WHere + Condition et Select
                         // Console.WriteLine(string.Join("\n", articles.Where(article => article.Price >= 1.65 && article.Price <= 2.4).Select(article => article.ToString())));
@@ -92,7 +90,7 @@ namespace csharp_article_management
 
                     // 7) Afficher tous les articles.
                     case 7:
-                        DisplayAllArticles(articles);
+                        DisplayAllArticles();
 
                         // Alternative une ligne sans boucle avec Join et LINQ Select
                         // Console.WriteLine(string.Join("\n", articles.Select(article => article.ToString())));
@@ -136,7 +134,7 @@ namespace csharp_article_management
         /// Boucle foreach dans notre liste d'articles pour afficher l'article dont l'id est égal à l'id entré par l'utilisateur
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayArticleById(List<Article> articles)
+        private static void DisplayArticleById()
         {
             string articleIdString = HandleUserInput("Id Article");
 
@@ -147,7 +145,8 @@ namespace csharp_article_management
                 return;
             }
 
-            if (!articles.Any(article => article.Id == articleId))
+            // Vérifie que notre liste contient bien un article avec l'id entrer par l'utilisateur
+            if (!Articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
                 return;
@@ -162,7 +161,7 @@ namespace csharp_article_management
             } */
 
             Console.WriteLine($"> Article trouvé avec l'id {articleId}: \n");
-            foreach (Article article in articles)
+            foreach (Article article in Articles)
             {
                 // Si l'id est égal à l'id entré par l'utilisateur
                 if (article.Id == articleId)
@@ -179,12 +178,12 @@ namespace csharp_article_management
         /// Ajoute un article à notre liste d'articles
         /// </summary>
         /// <param name="articles"></param>
-        private static void AddArticle(List<Article> articles)
+        private static void AddArticle()
         {
             string articleName = HandleUserInput("Nom de l'article");
 
             // On cherche si un article du même nom existe déjà, si c'est le cas on ajoute juste au stock de l'article
-            Article? article = articles.FirstOrDefault(article => article.Name.ToLower().Equals(articleName));
+            Article? article = Articles.FirstOrDefault(article => article.Name.ToLower().Equals(articleName));
             if (article != null)
             {
                 article.CurrentStock += 1;
@@ -214,13 +213,13 @@ namespace csharp_article_management
 
                 Article newArticle = new Article();
                 // Retourne l'id max de notre liste et ajoute + 1 pour un id libre
-                newArticle.Id = articles.Max(article => article.Id) + 1;
+                newArticle.Id = Articles.Max(article => article.Id) + 1;
                 newArticle.Name = articleName;
                 newArticle.Price = price;
                 newArticle.CurrentStock = stock;
                 newArticle.MaxStock = stock;
 
-                articles.Add(newArticle);
+                Articles.Add(newArticle);
 
                 Console.WriteLine($"> Succès l'article {newArticle.Name} a été correctement ajouté");
             }
@@ -230,7 +229,7 @@ namespace csharp_article_management
         /// Supprime l'article dont l'id est égal à celui entré par l'utilisateur de notre liste
         /// </summary>
         /// <param name="articles"></param>
-        private static void DeleteArticleById(List<Article> articles)
+        private static void DeleteArticleById()
         {
             string articleIdString = HandleUserInput("Id Article");
 
@@ -241,13 +240,13 @@ namespace csharp_article_management
                 return;
             }
 
-            if (!articles.Any(article => article.Id == articleId))
+            if (!Articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
                 return;
             }
 
-            articles.RemoveAll(article => article.Id == articleId);
+            Articles.RemoveAll(article => article.Id == articleId);
             Console.WriteLine($"> Succès l'article avec l'id {articleId} a bien été supprimer des articles");
         }
 
@@ -255,7 +254,7 @@ namespace csharp_article_management
         /// Modifie l'article dont l'id est égal à l'id entré par l'utilisateur
         /// </summary>
         /// <param name="articles"></param>
-        private static void EditArticleById(List<Article> articles)
+        private static void EditArticleById()
         {
             string articleIdString = HandleUserInput("Id Article");
 
@@ -267,14 +266,14 @@ namespace csharp_article_management
             }
 
             // Vérifie que notre liste contient bien un article avec l'id entrer par l'utilisateur
-            if (!articles.Any(article => article.Id == articleId))
+            if (!Articles.Any(article => article.Id == articleId))
             {
                 Console.WriteLine($"> Erreur aucun article avec l'id {articleId} n'a pu être trouvé ...");
                 return;
             }
 
             // Alternative une ligne sans boucle avec LINQ FirstOrDefault + Condition (premier résultat trouvé avec notre condition ou null)
-            Article? article = articles.FirstOrDefault(article => article.Id == articleId);
+            Article? article = Articles.FirstOrDefault(article => article.Id == articleId);
             if (article != null)
             {
                 string articlePrice = HandleUserInput("Prix de l'article", true);
@@ -333,7 +332,7 @@ namespace csharp_article_management
         /// Boucle foreach dans notre liste d'articles pour afficher l'article dont le nom est égal au nom entré par l'utilisateur
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayArticleByName(List<Article> articles)
+        private static void DisplayArticleByName()
         {
             string name = HandleUserInput("Nom").ToLower();
             if (name.Length >= 1 && name.Length < 3)
@@ -351,7 +350,7 @@ namespace csharp_article_management
             } */
 
             Console.WriteLine($"> Article trouvé avec le nom {name}: \n");
-            foreach (Article article in articles)
+            foreach (Article article in Articles)
             {
                 // Si le nom en minuscule est égal au nom entré par l'utilisateur
                 if (article.Name.ToLower().Equals(name))
@@ -367,7 +366,7 @@ namespace csharp_article_management
         /// Boucle foreach dans notre liste d'articles pour afficher leurs informations selon si le prix est compris entre prix min et prix max 
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayAllArticlesByPriceRange(List<Article> articles)
+        private static void DisplayAllArticlesByPriceRange()
         {
             string priceMinString = HandleUserInput("Prix minimum");
 
@@ -390,7 +389,7 @@ namespace csharp_article_management
             Console.WriteLine($"> Liste des articles dont le prix est compris entre {priceMin} Euro et {priceMax} Euro: \n");
 
             // LINQ OrderBy pour sortir les résultats par prix croissant
-            foreach (Article article in articles.OrderBy(article => article.Price))
+            foreach (Article article in Articles.OrderBy(article => article.Price))
             {
                 // Si le prix est égal ou supérieur à prix min et que prix est inférieur ou égale à prix max
                 if (article.Price >= priceMin && article.Price <= priceMax)
@@ -404,11 +403,11 @@ namespace csharp_article_management
         /// Boucle foreach dans notre liste d'articles pour afficher leurs informations
         /// </summary>
         /// <param name="articles"></param>
-        private static void DisplayAllArticles(List<Article> articles)
+        private static void DisplayAllArticles()
         {
             Console.WriteLine("> Liste des articles: \n");
 
-            foreach (Article article in articles)
+            foreach (Article article in Articles)
             {
                 Console.WriteLine(article.ToString());
             }
@@ -427,7 +426,7 @@ namespace csharp_article_management
             // Récupère le texte entré par l'utilisateur
             string? parameter = Console.ReadLine();
 
-            // Boucle qui tant que le texte est vide ou null on boucle jusqu'à ce que l'utilisateur entre quelque chose
+            // Boucle qui si n'accapte pas une entrée vide et que le texte est vide ou null on boucle jusqu'à ce que l'utilisateur entre quelque chose, si accepte l'entrée vide on sort et retourne un string vide
             while (!allowEmpty && string.IsNullOrEmpty(parameter))
             {
                 Console.WriteLine($"> Erreur {parameterName} ne peut pas être vide ...");
@@ -435,8 +434,8 @@ namespace csharp_article_management
                 parameter = Console.ReadLine();
             }
 
-            // Condition ternaire si accepte un texte vide et que le texte est vide ou null on retourne un string vide sinon on retourne le texte entré par l'utilisateur
-            return allowEmpty && string.IsNullOrEmpty(parameter) ? string.Empty : parameter;
+            // Condition ternaire si n'accepte pas un texte vide et que le texte n'est pas vide ou null on retourne le texte entré par l'utilisateur sinon un string vide
+            return !allowEmpty && !string.IsNullOrEmpty(parameter) ? parameter : string.Empty;
         }
     }
 }
